@@ -1,0 +1,75 @@
+{{define "/chat/profile.shtml"}}
+<div id="tabbar-profile" class="mui-control-content" v-show="win=='main'">
+    <header class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">个人中心</h1>
+    </header>
+
+    <ul class="mui-table-view mui-table-view-chevron top-bar-nav">
+        <li class="mui-table-view-cell mui-media">
+            <a @tap="win='updateinfo'" class="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left head-img avatar"
+                    :src="myself.avatar||'/asset/images/user.jpg'">
+                <div class="mui-media-body">
+                    <span v-text="myself.nickname"></span>
+                    <span class="showtitle" v-text="'uid: '+myself.id"></span>
+                    <p class='mui-ellipsis' v-text="myself.memo">专业可靠的IM解决方案专家</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+    <ul class="mui-table-view">
+        <li class="mui-table-view-cell">
+            <a @tap="win='sysnotice'" class="mui-navigate-right">
+                系统公告
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a href="#addfriend-sheet" class="mui-navigate-right">添加好友</a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a @click="applyJoinComm" class="mui-navigate-right">
+                加入社群
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a @tap="win='createcomm'" class="mui-navigate-right">
+                创建社群
+            </a>
+        </li>
+    </ul>
+    <ul class="mui-table-view" style="margin-top: 25px;">
+        <li class="mui-table-view-cell">
+            <a @tap="showemail" class="mui-navigate-right">
+                获取最新代码
+            </a>
+        </li>
+    </ul>
+    <ul class="mui-table-view" style="margin-top: 25px;">
+        <li class="mui-table-view-cell">
+            <a @click="quit" style="text-align: center;color: #FF3B30;">
+                退出登录
+            </a>
+        </li>
+    </ul>
+    <div id="addfriend-sheet" class="mui-popover mui-popover-bottom mui-popover-action ">
+        <!-- 可选择菜单 -->
+        <ul class="mui-table-view">
+            <li class="mui-table-view-cell">
+                <a @click="applyAddFriend('id')">通过id添加</a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a @click="applyAddFriend('mobile')">通过手机号添加</a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a @click="applyAddFriend('nickname')">通过昵称添加</a>
+            </li>
+        </ul>
+        <!-- 取消菜单 -->
+        <ul class="mui-table-view">
+            <li class="mui-table-view-cell">
+                <a href="#addfriend-sheet"><b>取消</b></a>
+            </li>
+        </ul>
+    </div>
+</div>
+{{end}}

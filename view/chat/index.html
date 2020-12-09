@@ -1,0 +1,46 @@
+{{define "/chat/index.shtml"}}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--js include-->
+    {{template "/chat/head.shtml"}}
+</head>
+
+<body>
+    <header class="mui-bar mui-bar-nav"></header>
+    <div class="mui-content" id="pageapp">
+        <!-- 聊天主界面 -->
+        {{template "/chat/chat.shtml"}}
+        <!-- 底部菜单 -->
+        {{template "/chat/tabmenu.shtml"}}
+
+        <!-- 联系人 -->
+        {{template "/chat/concat.shtml"}}
+        <!-- 用户详情页 -->
+        {{template "/chat/userinfo.shtml"}}
+
+        <!-- 群聊 -->
+        {{template "/chat/group.shtml"}}
+        <!-- 群聊详情页 -->
+        {{template "/chat/groupinfo.shtml"}}
+        <!-- 群聊通知页 -->
+        {{template "/chat/groupnotice.shtml"}}
+
+        <!-- 消息 -->
+        {{template "/chat/applyinfo.shtml"}}
+
+        <!-- 个人中心 -->
+        {{template "/chat/profile.shtml"}}
+        <!-- 个人信息更改页 -->
+        {{template "/chat/updateinfo.shtml"}}
+        <!-- 系统通知页 -->
+        {{template "/chat/sysnotice.shtml"}}
+        <!-- 创建群聊页 -->
+        {{template "/chat/createcomm.shtml"}}
+    </div>
+</body>
+
+</html>
+{{template "/chat/foot.shtml"}}
+{{end}}

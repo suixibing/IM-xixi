@@ -1,0 +1,61 @@
+{{define "/user/foot.shtml"}}
+<script>
+    var app = new Vue(
+        {
+            el: "#pageapp",
+            data: function () {
+                return {
+                    user: {
+                        mobile: "",
+                        passwd: "",
+                    }
+                }
+            },
+            methods: {
+                register: function () {
+                    // 检测手机号是否正确
+                    // console.log("login");
+                    // 检测密码是否为空
+
+                    // 网络请求
+                    // 封装了promis
+                    util.post("user/register", this.user).then(res => {
+                        console.log(res);
+                        if (res.code != 0) {
+                            mui.toast(res.msg);
+                        } else {
+                            mui.toast("注册成功,即将跳转");
+                            location.href = "login.shtml";
+                        }
+                    });
+                },
+                login: function () {
+                    // 检测手机号是否正确
+                    // console.log("login");
+                    // 检测密码是否为空
+
+                    // 网络请求
+                    // 封装了promis
+                    util.post("user/login", this.user).then(res => {
+                        console.log(res);
+                        if (res.code != 0) {
+                            mui.toast(res.msg);
+                        } else {
+                            mui.toast("登录成功,即将跳转");
+                            var url = "/chat/index.shtml?id=" + res.data.id + "&token=" + res.data.token;
+                            userInfo(res.data);
+                            userId(res.data.id);
+                            location.href = url;
+                        }
+                    });
+                },
+                keydownsendmsg: function (aimkey, fn, arg) {
+                    if (event.keyCode == aimkey) {
+                        fn(arg);
+                    }
+                }
+            }
+        }
+    );
+</script>
+{{end}}

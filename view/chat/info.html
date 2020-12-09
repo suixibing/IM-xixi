@@ -1,0 +1,142 @@
+{{define "/chat/groupinfo.shtml"}}
+<div id="tabbar-groupinfo" v-show="win=='groupinfo'">
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-icon mui-icon-left-nav mui-pull-left" @tap="win='group'"></a>
+        <h1 class="mui-title">群聊设置</h1>
+    </header>
+
+    <ul class="mui-table-view mui-table-view-chevron top-bar-nav">
+        <li class="mui-table-view-cell mui-media">
+            <a class="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left head-img avatar" id="group-head-img"
+                    :src="curgroup.icon||'/asset/images/community.png'">
+                <div class="mui-media-body">
+                    <span v-text="curgroup.name"></span>
+                    <span class="showtitle" v-text="'gid: '+curgroup.id"></span>
+                    <p class='mui-ellipsis' v-text="curgroup.memo"></p>
+                </div>
+            </a>
+        </li>
+    </ul>
+
+    <div class="clearfix" style="margin-top: 10px; background-color: #fff;">
+        <p class="my-table-view" style="padding: 5px 0;">
+            <span style="margin-left: 10px; color: #000; font-size: 17px;">群聊成员</span>
+            <span style="float: right; margin-right: 10px; color: #bbb;">共
+                <span v-text="curgroup.memids.length">4</span>
+                人<span class="mui-icon mui-icon-arrowright" style="font-size: 17px"></span>
+            </span>
+        </p>
+        <ul class="my-table-view">
+            <li v-for="(id, index) in curgroup.memids" @tap="openuserinfo(id)"
+                class="mui-media small-avatar-box mui-pull-left" v-if="index<10">
+                <img class="mui-media-object avatar" :src="usermap[id].avatar">
+                <span class="text-ellipsis avatar-title" v-text="usermap[id].nickname"></span>
+            </li>
+            <li class="mui-media small-avatar-box mui-pull-left">
+                <span class="mui-icon mui-icon-plus" style="font-size: 44px; height: 35px; margin: 0 0 9px 6px;"></span>
+                <span class="text-ellipsis avatar-title">邀请成员</span>
+            </li>
+        </ul>
+    </div>
+
+    <ul class="mui-table-view" style="margin-top: 10px;">
+        <li class="mui-table-view-cell">
+            <a class="mui-navigate-right" @tap="win='groupnotice'">
+                群公告
+            </a>
+        </li>
+    </ul>
+
+    <ul class="my-table-view" style="margin-top: 25px;">
+        <li @click="dropoutgroup(curgroup)" class="mui-table-view-cell">
+            <a style="text-align: center;color: #FF3B30;">
+                退出该群
+            </a>
+        </li>
+    </ul>
+</div>
+{{end}}
+
+{{define "/chat/userinfo.shtml"}}
+<div id="tabbar-userinfo" v-show="win=='userinfo'">
+    <header class="person-info-bar" style="box-shadow: 0 1px 6px #ccc;">
+        <a class="mui-icon mui-icon-left-nav mui-pull-left" @tap="userinfoback()"></a>
+        <div class="person-info-avatar">
+            <img class="avatar" :src="curuser.avatar||'/asset/images/user.jpg'">
+            <span class="avatar-title-line" style="padding-top: 16px;">
+                <span v-text="curuser.nickname"></span>
+                <span class="showtitle" v-text="'uid: '+curuser.id"></span>
+            </span>
+            <span class="avatar-title-line" style="padding-top: 39px; font-size: 14px;">
+                <span v-if="curuser.sex=='M'">男</span>
+                <span v-if="curuser.sex=='W'">女</span>
+                <span v-text="getuserage(curuser)+'岁'"></span>
+            </span>
+        </div>
+    </header>
+
+    <ul class="mui-table-view" style="margin-top: 63%;">
+        <li class="mui-table-view-cell">
+            <span class="mui-icon mui-icon-phone" style="margin: 0 15px;"></span>
+            <span class="text-ellipsis" v-text="curuser.mobile"></span>
+        </li>
+        <li class="mui-table-view-cell">
+            <span class="mui-icon mui-icon-qq" style="margin: 0 15px;"></span>
+            <span class="text-ellipsis">【1014293033】</span>
+        </li>
+        <li class="mui-table-view-cell">
+            <span class="mui-icon mui-icon-weixin" style="margin: 0 15px;"></span>
+            <span class="text-ellipsis">【abcdefg】</span>
+        </li>
+        <li class="mui-table-view-cell">
+            <span class="mui-icon mui-icon-email" style="margin: 0 15px;"></span>
+            <span class="text-ellipsis">【1014293033@qq.com】</span>
+        </li>
+        <li class="mui-table-view-cell">
+            <span class="mui-icon mui-icon-compose" style="margin: 0 15px;"></span>
+            <span class="text-ellipsis" v-text="curuser.memo"></span>
+        </li>
+    </ul>
+</div>
+{{end}}
+
+{{define "/chat/applyinfo.shtml"}}
+<div id="tabbar-applyinfo" class="mui-control-content" v-show="win=='main'">
+    <header class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">消息</h1>
+    </header>
+    <!-- msg: {userid, dstid, amount(0-默认,1-同意,2-拒绝), content申请理由}, user: user -->
+    <ul class="mui-table-view mui-table-view-chevron" style="margin-bottom: 53px;">
+        <li v-for="item in applys" class="mui-table-view-cell mui-media">
+
+            <img class="mui-media-object mui-pull-left avatar" :src="item.user.avatar">
+            <div class="mui-media-body">
+                <span v-text="item.user.nickname"></span>
+                <span class="showtitle" style="background-color: #f0ad4e;"
+                    v-if="item.ismine && item.msg.amount==11">群主</span>
+                <p class="mui-ellipsis">
+                    <span v-text="item.msg.content"></span>
+                    <span style="color: red; float: right;" v-text="item.msg.memo"></span>
+                </p>
+                <!-- 别人的请求的回复 -->
+                <p class="mui-ellipsis" v-if="!item.ismine && item.msg.memo=='申请中'">
+                    <button type="button" class="mui-btn mui-btn-primary" @tap="dealApply(item)">同意</button>
+                    <button type="button" class="mui-btn mui-btn-primary" style="margin: 0 40px;"
+                        @tap="updateapply(item, '拒绝')">拒绝</button>
+                </p>
+            </div>
+        </li>
+        <!-- 没有消息时显示 -->
+        <li v-if="applys.length==0" class="mui-table-view-cell mui-media mui-collapse">
+            <a href="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left avatar" src="/asset/images/notice.png">
+                <div class="mui-media-body">
+                    <span>暂时还没有消息</span>
+                    <p>...</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
+{{end}}

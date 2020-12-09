@@ -1,0 +1,852 @@
+{{define "/chat/foot.shtml"}}
+<script>
+    function upload(dom) {
+        uploadfile("attach/upload", dom, function (res) {
+            if (res.code == 0) {
+                app.sendpicmsg(res.data);
+            }
+        });
+    }
+    function userId() {
+        return parseInt(util.parseQuery("id"));
+    }
+    var app = new Vue(
+        {
+            el: "#pageapp",
+            data: {
+                createcomm: {
+                    name: "",
+                    cate: 0,
+                    memo: "",
+                    icon: "",
+                    ownerid: 0,
+                },
+                myself: {},
+                usermap: {},
+                communitymap: {},
+                applymap: {},
+                itemqueue: {},
+                friends: [],
+                friendsunreadmsg: 0,
+                communitys: [],
+                communitysunreadmsg: 0,
+                applys: [],
+                chatbackground: "/asset/images/default-background.jpg",
+                sysnotices: [],
+                webSocket: {},
+                win: "main",
+                showchathistory: true,
+                curcate: 0,
+                curgroup: {
+                    memids: [],
+                    groupnotices: [],
+                },
+                curuser: {},
+                txtmsg: "",
+                panelstat: "kbord",
+                txtstat: "kbord",
+                title: "",
+                doutu: {
+                    config: {
+                        "baseurl": "/asset/plugins/doutu",
+                        "pkgids": ["emoj"],
+                    },
+                    packages: [],
+                    choosed: { "pkgid": "emoj", "assets": [], "size": "small" }
+                },
+                msglist: [],
+                msgcontext: {
+                    dstid: 10,
+                    cmd: 10,
+                    userid: userId(),
+                },
+                plugins: [
+                    {
+                        icon: "/asset/images/upload.png",
+                        name: "照片",
+                        id: "upload",
+                        slot: "<input accept=\"image/gif,image/jpeg,,image/png\" type=\"file\" onchange=\"upload(this)\" class='upload' />",
+                    },
+                    {
+                        icon: "/asset/images/camera.png",
+                        name: "拍照",
+                        id: "camera",
+                        slot: "<input accept=\"image/*\" capture=\"camera\" type=\"file\" onchange=\"upload(this)\" class='upload' />",
+                    },
+                    {
+                        icon: "/asset/images/audiocall.png",
+                        name: "语音",
+                        id: "audiocall",
+                    },
+                    {
+                        icon: "/asset/images/videocall.png",
+                        name: "视频",
+                        id: "videocall",
+                    },
+                    {
+                        icon: "/asset/images/redpackage.png",
+                        name: "红包",
+                        id: "redpackage",
+                    },
+                    {
+                        icon: "/asset/images/exchange.png",
+                        name: "转账",
+                        id: "exchange",
+                    },
+                    {
+                        icon: "/asset/images/address.png",
+                        name: "地址",
+                        id: "address",
+                    },
+                    {
+                        icon: "/asset/images/person.png",
+                        name: "名片",
+                        id: "person",
+                    }
+                ],
+                timer: 0,
+                recorder: {},
+                allChunks: [],
+                iscomplete: false,
+                duration: 0,
+                showprocess: false,
+            },
+            created: function () {
+                this.initwebsocket();
+
+                this.loadfriends();
+                this.loadcommunitys();
+                this.loaddoutures();
+                this.loadnotifications(0, 0);
+                this.loadapplyinfo();
+                var user = userInfo();
+                if (!!user) {
+                    this.myself = user;
+                    this.usermap[user.id] = user;
+                }
+                // 注意：必须在加载好友和群组之前初始化websocket
+                // this.initwebsocket();
+            },
+            mounted: function () {
+                // todo
+            },
+            methods: {
+                uploadthis: function (dom, cate) {
+                    var data = new FormData();
+                    for (let file of dom.files) {
+                        data.append('file', file);
+                    }
+
+                    let xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var res = JSON.parse(xhr.responseText);
+                            if (res.code != 0) {
+                                mui.toast(res.msg);
+                            } else {
+                                if (cate == "comm") {
+                                    app.createcomm.icon = res.data;
+                                } else if (cate == "myself") {
+                                    app.myself.avatar = res.data;
+                                }
+                                mui.toast("上传成功");
+                            }
+                        }
+                    };
+                    xhr.open('POST', '/attach/upload');
+                    xhr.send(data);
+                },
+                createcommunity: function () {
+                    this.createcomm.ownerid = userId();
+                    if (!this.createcomm.name) {
+                        mui.toast("请填写名称");
+                        return;
+                    }
+                    if (this.createcomm.memo == "") {
+                        this.createcomm.memo = "群主很懒，还没有群介绍哦~";
+                    }
+                    post("contact/createcommunity", this.createcomm, function (res) {
+                        if (res.code == 0) {
+                            mui.toast("创建成功");
+                        } else {
+                            mui.toast(res.msg);
+                        }
+                    });
+                },
+                updateinfo: function () {
+                    post("user/updateinfo", this.myself, function (res) {
+                        if (res.code == 0) {
+                            var ret = JSON.parse(this.responseText);
+                            userInfo(ret.data);
+                            mui.toast("个人信息更新成功");
+                        } else {
+                            mui.toast(res.msg);
+                        }
+                    });
+                },
+                isMobile: function () {
+                    return navigator.userAgent.match(/(blackberry|configuration\/cldc|hp |hp-|htc |htc_|htc-|iemobile|kindle|midp|mmp|motorola|mobile|nokia|opera mini|opera |Googlebot-Mobile|YahooSeeker\/M1A1-R2D2|android|iphone|ipod|mobi|palm|palmos|pocket|portalmmm|ppc;|smartphone|sonyericsson|sqh|spv|symbian|treo|up.browser|up.link|vodafone|windows ce|xda |xda_)/i) ? true : false;
+                },
+                playaudio: function (url) {
+                    document.getElementById('audio4play').src = url;
+                    document.getElementById('audio4play').play();
+                },
+                startrecorder: function () {
+                    let audioTarget = document.getElementById('audio');
+                    var types = ["video/webm",
+                        "audio/webm",
+                        "video/webm\;codecs=vp8",
+                        "video/webm\;codecs=daala",
+                        "video/webm\;codecs=h264",
+                        "audio/webm\;codecs=opus",
+                        "video/mpeg"];
+                    var suporttype = "";
+                    for (var i in types) {
+                        if (MediaRecorder.isTypeSupported(types[i])) {
+                            suporttype = types[i];
+                        }
+                    }
+                    if (!suporttype) {
+                        mui.toast("编码不支持");
+                        return;
+                    }
+
+                    this.duration = new Date().getTime();
+                    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                        .then(function (stream) {
+                            this.showprocess = true;
+                            this.recorder = new MediaRecorder(stream);
+                            audioTarget.srcObject = stream;
+                            this.recorder.ondataavailable = (event) => {
+                                console.log("ondataavailable");
+                                uploadblob("attach/upload", event.data, ".mp3", res => {
+                                    var duration = Math.ceil((new Date().getTime() - this.duration) / 1000);
+                                    this.sendaudiomsg(res.data, duration);
+                                });
+                                stream.getTracks().forEach(function (track) {
+                                    track.stop();
+                                });
+                                this.showprocess = false;
+                            }
+                            this.recorder.start();
+                        }.bind(this)).catch(function (err) {
+                            console.log(err);
+                            mui.toast(err);
+                            this.showprocess = false;
+                        }.bind(this));
+                },
+                stoprecorder: function () {
+                    if (typeof this.recorder.stop == "function") {
+                        this.recorder.stop();
+                    }
+                    this.showprocess = false;
+                    console.log("stoprecorder");
+                },
+                clickgetaudio: function () {
+                    var input = document.getElementById('inputaudio');
+                    if (!this.showprocess) {
+                        this.startrecorder();
+                        input.value = '再按一次停止说话';
+                    } else {
+                        this.stoprecorder();
+                        input.value = '按住说话';
+                    }
+                },
+                dispatchplugin: function (item) {
+                    switch (item.id) {
+                        case "upload":
+                        case "camera":
+
+                            break;
+                        default:
+                            mui.toast("系统暂不支持,请自行扩展");
+                    }
+                },
+                reset: function () {
+                    this.panelstat = "kbord";
+                    this.txtstat = "kbord";
+                    this.txtmsg = "";
+                },
+                createmsgcontext: function (msg) {
+                    if (msg == undefined) {
+                        msg = this.msgcontext;
+                    }
+                    return JSON.parse(JSON.stringify(msg));
+                },
+                loaddoutures: function () {
+                    var res = [];
+                    var config = this.doutu.config;
+                    for (var i in config.pkgids) {
+                        res[config.pkgids[i]] = (config.baseurl + "/" + config.pkgids[i] + "/info.json");
+                    }
+                    var that = this;
+                    for (var id in res) {
+                        //console.log("res[i]",id,res[id]);
+                        post(res[id], {}, function (pkginfo) {
+                            //console.log("post res[i]",id,res[id],pkginfo);
+                            var baseurl = config.baseurl + "/" + pkginfo.id + "/";
+                            for (var j in pkginfo.assets) {
+                                pkginfo.assets[j] = baseurl + pkginfo.assets[j];
+                            }
+                            pkginfo.icon = baseurl + pkginfo.icon;
+                            that.doutu.packages.push(pkginfo);
+                            if (that.doutu.choosed.pkgid == pkginfo.id) {
+                                that.doutu.choosed.assets = pkginfo.assets;
+                            }
+                        });
+                    }
+                },
+                showemail: function () {
+                    mui.alert("请发送邮箱suixibing@gmail.com索取");
+                },
+                showmsg: function (user, msg) {
+                    var data = {
+                        user: user,
+                        msg: msg,
+                        ismine: userId() == msg.userid,
+                    }
+                    //console.log(data.ismine,userId(),msg.userid);
+                    this.msglist = this.msglist.concat(data);
+                    this.updatelastrecord(msg);
+                    this.reset();
+                    var that = this;
+                    that.timer = setTimeout(function () {
+                        window.scrollTo(0, document.getElementById("convo").offsetHeight);
+                        clearTimeout(that.timer);
+                    }, 100);
+                },
+                startrecord: function () {
+                    // todo
+                },
+                dateString: function (d) {
+                    function pad(n) { return n < 10 ? '0' + n : n }
+                    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-'
+                        + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':'
+                        + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + 'Z';
+                },
+                dateString8000: function (d) {
+                    return this.dateString(d).replace("Z", "+08:00");
+                },
+                getchathistory: function () {
+                    // amount-10用户 amount-11群
+                    //{id:1,userid:2,dstid:3,cmd:302,amount:10,content:{start:"2020-12-4 xx:xx:xx", end: "2020-12-4 xx-xx-xx"}}
+                    if (this.curcate == 1) {
+                        item = this.curuser;
+                    } else if (this.curcate == 2) {
+                        item = this.curgroup;
+                    } else {
+                        mui.toast("获取聊天记录调用错误！");
+                        return;
+                    }
+                    var msg = this.createmsgcontext();
+                    msg.content = this.dateString(item.historytime);
+                    // msg.content = JSON.stringify(msg.content);
+                    msg.amount = msg.cmd;
+                    msg.cmd = 302;
+                    this.webSocket.send(JSON.stringify(msg));
+                    console.log("send==> " + JSON.stringify(msg));
+                },
+                sendtxtmsg: function (txt) {
+                    //{id:1,userid:2,dstid:3,cmd:10,media:1,content:"hello"}
+                    var msg = this.createmsgcontext();
+                    msg.media = 1;
+                    msg.content = txt;
+                    msg.createat = this.dateString8000(new Date());
+                    this.showmsg(userInfo(), msg);
+                    this.webSocket.send(JSON.stringify(msg));
+                },
+                sendaudiomsg: function (url, num) {
+                    //{id:1,userid:2,dstid:3,cmd:10,media:3,url:"http://www.a,com/dsturl.mp3",anount:40}
+                    var msg = this.createmsgcontext();
+                    msg.media = 3;
+                    msg.url = url;
+                    msg.amount = num;
+                    msg.content = '[音频 ' + msg.amount + 's]';
+                    msg.createat = this.dateString8000(new Date());
+                    this.showmsg(userInfo(), msg);
+                    //console.log("sendaudiomsg",this.msglist);
+                    this.webSocket.send(JSON.stringify(msg));
+                    console.log(JSON.stringify(msg));
+                },
+                sendpicmsg: function (picurl) {
+                    //{id:1,userid:2,dstid:3,cmd:10,media:4,url:"http://www.baidu.com/a/log,jpg"}
+                    var msg = this.createmsgcontext();
+                    msg.media = 4;
+                    msg.url = picurl;
+                    msg.content = '[图片]';
+                    msg.createat = this.dateString8000(new Date());
+                    this.showmsg(userInfo(), msg);
+                    this.webSocket.send(JSON.stringify(msg));
+                },
+                singlemsg: function (user) {
+                    //console.log(user);
+                    this.win = "single";
+                    this.title = "和" + user.nickname + "聊天中";
+                    this.msgcontext.dstid = parseInt(user.id);
+                    this.msgcontext.cmd = 10;
+                    this.friendsunreadmsg -= user.unreadmsg;
+                    this.curcate = 1; // 单聊
+                    this.curuser = this.usermap[user.id];
+                    this.showchathistory = this.curuser.showchathistory;
+                    user.unreadmsg = 0;
+                },
+                groupmsg: function (group) {
+                    this.win = "group";
+                    this.title = group.name;
+                    this.msgcontext.dstid = parseInt(group.id);
+                    this.msgcontext.cmd = 11;
+                    this.communitysunreadmsg -= group.unreadmsg;
+                    this.curcate = 2; // 群聊
+                    this.curgroup = this.communitymap[group.id];
+                    this.showchathistory = this.curgroup.showchathistory;
+                    group.unreadmsg = 0;
+                },
+                openuserinfo: function (userid) {
+                    this.win = "userinfo";
+                    this.curuser = this.usermap[userid];
+                },
+                userinfoback: function () {
+                    if (this.curcate == 1) {
+                        this.win = "single";
+                    } else {
+                        this.win = "groupinfo";
+                    }
+                },
+                moreinfo: function (curcate) {
+                    if (curcate == 1) {
+                        this.win = "userinfo";
+                    } else if (curcate == 2) {
+                        this.win = "groupinfo";
+                    }
+                },
+                loaduserinfo: function (userid, cb) {
+                    userid = "" + userid;
+                    var userinfo = this.usermap[userid];
+                    if (!userinfo) {
+                        post("user/find", { dstid: parseInt(userid) }, function (res) {
+                            this.usermap[userid] = res.data;
+                            cb(res.data);
+                        }.bind(this));
+                    } else {
+                        cb(userinfo);
+                    }
+                },
+                keydownsendmsg: function (aimkey, fn, arg) {
+                    if (event.keyCode == aimkey) {
+                        fn(arg);
+                    }
+                },
+                onmessage: function (msg) {
+                    var tmpuser = this.usermap[msg.userid];
+                    if (msg.cmd == 10 || msg.cmd == 11) {
+                        this.showmsg(tmpuser, msg);
+                        this.unreadmsgplus(msg);
+                    } else if (msg.cmd == 20) { // 服务端要求更新用户信息
+                        this.usermap[msg.userid] = undefined;
+                        this.loaduserinfo(msg.userid, function (user) {
+                            // 这里必须是修改原来的数据，而不能直接使用post获取的新数据
+                            // 否则地址可能发生了改变，lastrecord和unreadmsg的修改不再会重新渲染页面
+                            var newuser = this.usermap[msg.userid];
+                            tmpuser.avatar = newuser.avatar;
+                            tmpuser.memo = newuser.memo;
+                            tmpuser.nickname = newuser.nickname;
+                            tmpuser.sex = newuser.sex;
+                            this.usermap[msg.userid] = tmpuser;
+                        }.bind(this));
+                    } else if (msg.cmd == 201) { // 退群成功，接下来将前端缓存communitys中的目标群群移除
+                        var tmp = [];
+                        for (var i = 0; i < this.communitys.length; i++) {
+                            if (this.communitys[i].id != msg.dstid) {
+                                tmp.push(this.communitys[i]);
+                            }
+                        }
+                        this.communitys = tmp;
+                        this.win = "main";
+                    } else if (msg.cmd == 202) { // 获取历史聊天记录成功，接下来将其加入到聊天记录中
+                        this.cmd202(msg);
+                    } else if (msg.cmd == 203) { // 有人申请添加好友或加群
+                        if (msg.amount != 10 && msg.amount != 11) { // 如果是一个未预计的值就报错
+                            mui.toast(msg.content);
+                            return;
+                        }
+                        var userid = msg.userid;
+                        var apply = {
+                            ismine: userId() == userid,
+                            user: this.usermap[userid],
+                            msg: msg,
+                        };
+                        if (apply.ismine) {
+                            userid = msg.dstid;
+                            apply.user = this.usermap[userid];
+                            if (msg.amount == 10) {
+                                apply.msg.content = "您正在申请添加他为好友！";
+                            } else if (msg.amount == 11) {
+                                apply.msg.content = "您正在" + apply.msg.content;
+                            }
+                        }
+                        if (apply.user == undefined) {
+                            this.loaduserinfo(userid, function (user) {
+                                apply.user = this.usermap[userid];
+                                this.applymap[apply.msg.id] = apply;
+                                this.applys.push(apply);
+                            }.bind(this));
+                            return;
+                        }
+                        this.applymap[apply.msg.id] = apply;
+                        this.applys.push(apply);
+                    } else if (msg.cmd == 204) { // 更新申请信息
+                        this.applymap[msg.id].msg.memo = msg.memo;
+                    } else if (msg.cmd == 205) { // 加好友/群成功
+                        if (msg.amount == 10) {
+                            var userid;
+                            // 同意方发出更新消息请求，同时更新好友信息
+                            if (msg.dstid == userId()) {
+                                this.updateapply(this.itemqueue[msg.id], '同意');
+                                userid = msg.userid;
+                            } else {
+                                userid = msg.dstid;
+                            }
+                            // 加载对端用户为好友
+                            if (this.usermap[userid] == undefined) {
+                                this.loaduserinfo(userid, function (user) {
+                                    this._localPushFriend(this.usermap[userid]);
+                                }.bind(this));
+                                return;
+                            }
+                            this._localPushFriend(this.usermap[userid]);
+                        } else if (msg.amount == 11) {
+                            // 同意方发出更新消息请求，同时更新好友信息
+                            if (msg.dstid == userId()) {
+                                this.updateapply(this.itemqueue[msg.id], '同意');
+                            }
+                            // 更新群信息
+                            this.loadcommunitys();
+                        }
+                    } else if (msg.cmd == 400) {
+                        mui.toast(msg.content);
+                    }
+                },
+                updateapply: function (item, memo) {
+                    var msg = item.msg;
+                    msg.memo = memo;
+                    msg.cmd = 304;
+                    this.webSocket.send(JSON.stringify(msg));
+                },
+                cmd202: function (msg) {
+                    // 获取操作对象
+                    var item;
+                    if (msg.amount == 10) {
+                        item = this.usermap[msg.dstid];
+                    } else {
+                        item = this.communitymap[msg.dstid];
+                    }
+                    // 获取返回的聊天记录
+                    var content = JSON.parse(msg.content);
+                    if (content.length == 0) {
+                        item.showchathistory = false;
+                        this.showchathistory = false;
+                        mui.toast("暂无更早的记录！");
+                        return;
+                    }
+                    // 如果还没有聊过天的话，更新最后一句话为返回的最近一条聊天记录
+                    if (item.lastrecord == "") {
+                        item.lastrecord = content[content.length - 1].content;
+                    }
+                    // 为返回的聊天室修改最新历史记录时间
+                    item.historytime = new Date(content[0].createat);
+                    item.historytime = new Date(item.historytime - 1);
+                    for (var index in content) {
+                        var tmpmsg = content[index];
+                        var data = {};
+                        data.ismine = userId() == tmpmsg.userid;
+                        data.user = this.usermap[tmpmsg.userid];
+                        data.msg = tmpmsg;
+                        this.msglist.push(data);
+                        console.log(data);
+                    }
+                    this.msglist.sort(function (a, b) {
+                        var t1 = new Date(a.msg.createat);
+                        var t2 = new Date(b.msg.createat);
+                        return t1 - t2;
+                    });
+                },
+                unreadmsgplus: function (msg) {
+                    if (msg.cmd == 10) {
+                        if (msg.userid != this.curuser.id || this.curcate != 1) {
+                            var user = this.usermap[msg.userid];
+                            user.unreadmsg++;
+                            this.friendsunreadmsg++;
+                        }
+                    } else if (msg.cmd == 11) {
+                        if (msg.dstid != this.curgroup.id || this.curcate != 2) {
+                            var community = this.communitymap[msg.dstid];
+                            community.unreadmsg++;
+                            this.communitysunreadmsg++;
+                        }
+                    }
+                },
+                updatelastrecord: function (msg) {
+                    if (msg.cmd == 10) {
+                        var userid = userId();
+                        var user = this.usermap[msg.userid];
+                        // 如果单聊时自己是发送者，因为要修改对方的lastrecord，所以这里要获得对方的user
+                        if (msg.userid == userid) {
+                            user = this.usermap[msg.dstid];
+                        }
+                        user.lastrecord = msg.content;
+                    } else if (msg.cmd == 11) {
+                        var community = this.communitymap[msg.dstid];
+                        community.lastrecord = msg.content;
+                        community.lastsayid = msg.userid;
+                    } else {
+                        mui.alert('该模式暂时还未支持！');
+                    }
+                },
+                initwebsocket: function () {
+                    var url = "ws://" + location.host + "/chat?id=" + userId() + "&token=" + util.parseQuery("token");
+                    this.webSocket = new WebSocket(url);
+                    var that = this;
+                    //消息处理
+                    this.webSocket.onmessage = function (evt) {
+                        //{"data":"}",...}
+                        if (evt.data.indexOf("}") > -1) {
+                            var msg = JSON.parse(evt.data);
+                            that.onmessage(msg);
+                            console.log("recv json<==" + evt.data);
+                        } else {
+                            console.log("recv<==" + evt.data);
+                        }
+                    }.bind(this);
+                    //关闭回调
+                    this.webSocket.onclose = function (evt) {
+                        location.href = "/user/login.shtml";
+                        console.log(evt.data);
+                    }
+                    //出错回调
+                    this.webSocket.onerror = function (evt) {
+                        console.log(evt.data);
+                    }
+                    /*{
+                        this.webSocket.send();
+                    }*/
+                },
+                sendmsg: function () {
+                    // todo
+                },
+                getuserage: function (user) {
+                    var birthday = new Date(user.birthday);
+                    var now = new Date();
+                    return now.getFullYear() - birthday.getFullYear();
+                },
+                loadapplyinfo: function () {
+                    // todo
+                },
+                _localPushFriend: function (plainuser) {
+                    var friend = plainuser;
+                    friend.unreadmsg = 0;
+                    friend.lastrecord = "";
+                    friend.showchathistory = true;
+                    friend.historytime = new Date();
+                    this.friends.push(friend);
+                    this.usermap[friend.id] = friend;
+                },
+                loadfriends: function () {
+                    post("contact/loadfriend", { userid: userId() }, function (res) {
+                        if (res.code != 0) {
+                            mui.alert(res.msg);
+                            return;
+                        }
+                        for (var i in res.rows) {
+                            this._localPushFriend(res.rows[i]);
+                        }
+                    }.bind(this));
+                },
+                _localPushCommunity: function (plaincomm) {
+                    var comm = plaincomm;
+                    comm.unreadmsg = 0;
+                    comm.lastsayid = this.myself.id;
+                    comm.lastrecord = "";
+                    comm.showchathistory = true;
+                    comm.historytime = new Date();
+                    this.communitys.push(comm);
+                    this.communitymap[comm.id] = comm;
+                    // 加载群通知
+                    this.loadnotifications(comm.id, 0);
+                    // 加载群聊中的所有人
+                    for (var j = 0; j < comm.memids.length; j++) {
+                        var userid = comm.memids[j];
+                        if (this.usermap[userid] == undefined) {
+                            this.loaduserinfo(userid, function (user) { }.bind(this));
+                        }
+                    }
+                },
+                loadcommunitys: function () {
+                    var that = this;
+                    post("contact/loadcommunity", { userid: userId() }, function (res) {
+                        if (res.code != 0) {
+                            mui.alert(res.msg);
+                            return;
+                        }
+                        for (var i in res.rows) {
+                            var comm = res.rows[i];
+                            var oldcomm = that.communitymap[comm.id];
+                            if (oldcomm == undefined) {
+                                that._localPushCommunity(comm);
+                            } else {
+                                // 如果是已经加载的群，就要保留本地缓存
+                                oldcomm.cate = comm.cate;
+                                oldcomm.icon = comm.icon;
+                                oldcomm.memo = comm.memo;
+                                oldcomm.name = comm.name;
+                                oldcomm.ownerid = comm.ownerid;
+                                oldcomm.memids = comm.memids;
+                                // 加载群聊中的所有人
+                                for (var j = 0; j < oldcomm.memids.length; j++) {
+                                    var userid = oldcomm.memids[j];
+                                    if (that.usermap[userid] == undefined) {
+                                        that.loaduserinfo(userid, function (user) { }.bind(that));
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+                loadnotifications: function (dstid, num) {
+                    var that = this;
+                    var url = "loadnotifications?dstid=" + dstid + "&num=" + num;
+                    post(url, { userid: userId() }, function (res) {
+                        if (res.code != 0) {
+                            mui.alert(res.msg);
+                            return;
+                        }
+                        if (dstid == 0) {
+                            that.sysnotices = res.rows || [];
+                        } else {
+                            that.communitymap[dstid].groupnotices = res.rows || [];
+                        }
+                    }.bind(this));
+                },
+                applyAddFriend: function (cate) {
+                    var that = this;
+                    var placeholder, type;
+                    type = 'number';
+                    if (cate == 'id') {
+                        placeholder = '请输入目标用户ID';
+                    } else if (cate == 'mobile') {
+                        placeholder = '请输入目标用户手机号';
+                    } else {
+                        mui.toast('该功能还不支持！');
+                        return;
+                    }
+                    //prompt
+                    mui.prompt('', placeholder, '加好友', ['取消', '确认'], function (e) {
+                        if (e.index == 1) {
+                            if (isNaN(e.value) || e.value <= 0) {
+                                mui.toast('格式错误！');
+                            } else if (cate == 'id') {
+                                var dstid = e.value;
+                                that._applyinfo(Number(dstid), 10, that.myself.nickname + "请求加您为好友！");
+                            } else {
+                                that._applyAddFriendbymobile(e.value);
+                            }
+                        } else {
+                            mui.toast('您取消了加好友操作！');
+                        }
+                    }, 'div');
+                    document.querySelector('.mui-popup-input input').type = type;
+                },
+                dealApply: function (item) {
+                    // 直接修改203为305
+                    // {id:1,userid:2,dstid:3,cmd:305,amount:10}
+                    // {id:1,userid:2,dstid:3,cmd:305,amount:11}
+                    item.msg.cmd = 305;
+                    this.itemqueue[item.msg.id] = item;
+                    this.webSocket.send(JSON.stringify(item.msg));
+                    item.msg.cmd = 203;
+                },
+                _applyinfo: function (dstid, amount, content) {
+                    var msg = {
+                        userid: userId(),
+                        dstid: dstid,
+                        cmd: 303,
+                        amount: amount,
+                        content: content,
+                        memo: '申请中',
+                    };
+                    //{id:1,userid:2,dstid:3,cmd:303,content:"",amount:10} 申请加好友
+                    //{id:1,userid:2,dstid:3,cmd:303,content:"",amount:11} 申请加群
+                    this.webSocket.send(JSON.stringify(msg));
+                },
+                _applyAddFriendbymobile: function (mobile) {
+                    var that = this;
+                    post("user/addfriend", { dstmobile: mobile, userid: userId() }, function (res) {
+                        if (res.code == 0) {
+                            mui.toast("添加成功");
+                            that.loadfriends();
+                        } else {
+                            mui.toast(res.msg);
+                        }
+                    });
+                },
+                _applyJoinComm_old: function (dstobj) {
+                    var that = this;
+                    post("user/joincommunity", { dstid: dstobj, "userid": userId() }, function (res) {
+                        if (res.code == 0) {
+                            mui.toast("添加成功");
+                            that.loadcommunitys();
+                        } else {
+                            mui.toast(res.msg);
+                        }
+                    });
+                },
+                applyJoinComm: function () {
+                    var that = this;
+                    mui.prompt('', '请输入群号', '加群', ['取消', '确认'], function (e) {
+                        if (e.index == 1) {
+                            if (isNaN(e.value) || e.value <= 0) {
+                                mui.toast('格式错误');
+                            } else {
+                                //mui.toast(e.value);
+                                var dstid = e.value;
+                                that._applyinfo(Number(dstid), 11, "申请加群(gid=" + dstid + ")！");
+                            }
+                        } else {
+                            mui.toast('您取消了加群操作！');
+                        }
+                    }, 'div');
+                    document.querySelector('.mui-popup-input input').type = 'number';
+                },
+                quit: function () {
+                    sessionStorage.removeItem("userid");
+                    sessionStorage.removeItem("userinfo");
+                    location.href = "/user/login.shtml";
+                    post("user/logout", { "id": userId() }, function (res) {
+                        if (res.code == 0) {
+                            mui.toast("退出成功");
+                        } else {
+                            mui.toast(res.msg);
+                        }
+                    });
+                },
+                dropoutgroup: function (group) {
+                    this.msgcontext.dstid = group.id;
+                    this.msgcontext.cmd = 301;
+                    //{id:1,userid:2,dstid:3,cmd:301}
+                    var msg = this.createmsgcontext();
+                    this.webSocket.send(JSON.stringify(msg));
+                }
+            },
+            watch: {
+                "win": function (n, o) {
+                    // console.log("watch",o,n);
+                    if (n != "main") {
+                        document.getElementById("menubar").style.display = "none";
+                    } else {
+                        document.getElementById("menubar").style.display = "block";
+                    }
+                }
+            }
+        }
+    );
+</script>
+{{end}}

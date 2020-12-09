@@ -1,0 +1,97 @@
+{{define "/chat/sysnotice.shtml"}}
+<div id="tabbar-sysnotice" v-show="win=='sysnotice'">
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-icon mui-icon-left-nav mui-pull-left" @tap="win='main'"></a>
+        <h1 class="mui-title">系统公告</h1>
+    </header>
+    <ul class="mui-table-view mui-table-view-chevron top-bar-nav">
+        <li v-for="item in sysnotices" class="mui-table-view-cell mui-media mui-collapse">
+            <a class="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left avatar" :src="item.pic">
+                <div class="mui-media-body">
+                    <span v-text="item.content"></span>
+                    <p class='mui-ellipsis' v-text="item.createat"></p>
+                </div>
+            </a>
+            <div class="mui-card mui-collapse-content" style="width: 320px;margin: 15px auto;">
+                <div class="mui-card-header mui-card-media">
+                    <img class="avatar" :src="item.pic">
+                    <div class="mui-media-body">
+                        <b v-text="item.userid"></b>
+                        <p>发表于 <span v-text="item.createat"></span></p>
+                    </div>
+                </div>
+                <div class="mui-card-content">
+                    <div class="div">&nbsp;</div>
+                    <div class="mui-media-body" v-text="item.content"></div>
+                    <div class="div">&nbsp;</div>
+                </div>
+                <div class="mui-card-footer">
+                    <a class="mui-card-link">Like</a>
+                    <a class="mui-card-link">Comment</a>
+                    <a class="mui-card-link">Read more</a>
+                </div>
+            </div>
+        </li>
+        <!-- 没有公告时显示 -->
+        <li v-if="sysnotices.length==0" class="mui-table-view-cell mui-media mui-collapse">
+            <a href="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left avatar" src="/asset/images/notice.png">
+                <div class="mui-media-body">
+                    <span>暂时还没有系统通知</span>
+                    <p>...</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
+{{end}}
+
+{{define "/chat/groupnotice.shtml"}}
+<div id="tabbar-groupnotice" v-show="win=='groupnotice'">
+    <header class="mui-bar mui-bar-nav">
+        <a class="mui-icon mui-icon-left-nav mui-pull-left" @tap="win='groupinfo'"></a>
+        <h1 class="mui-title">群公告</h1>
+    </header>
+    <ul class="mui-table-view mui-table-view-chevron top-bar-nav">
+        <li v-for="item in curgroup.groupnotices" class="mui-table-view-cell mui-media mui-collapse">
+            <a class="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left avatar" :src="item.pic">
+                <div class="mui-media-body">
+                    <span v-text="item.content"></span>
+                    <p class='mui-ellipsis' v-text="item.createat"></p>
+                </div>
+            </a>
+            <div class="mui-card mui-collapse-content" style="width: 320px;margin: 15px auto;">
+                <div class="mui-card-header mui-card-media">
+                    <img class="avatar" :src="usermap[item.userid].avatar">
+                    <div class="mui-media-body">
+                        <b v-text="usermap[item.userid].nickname"></b>
+                        <p>发表于 <span v-text="item.createat"></span></p>
+                    </div>
+                </div>
+                <div class="mui-card-content">
+                    <div class="div">&nbsp;</div>
+                    <div class="mui-media-body" v-text="item.content"></div>
+                    <div class="div">&nbsp;</div>
+                </div>
+                <div class="mui-card-footer">
+                    <a class="mui-card-link">Like</a>
+                    <a class="mui-card-link">Comment</a>
+                    <a class="mui-card-link">Read more</a>
+                </div>
+            </div>
+        </li>
+        <!-- 没有公告时显示 -->
+        <li v-if="curgroup.groupnotices.length==0" class="mui-table-view-cell mui-media mui-collapse">
+            <a href="mui-navigate-right">
+                <img class="mui-media-object mui-pull-left avatar" src="/asset/images/notice.png">
+                <div class="mui-media-body">
+                    <span>暂时还没有群公告</span>
+                    <p>...</p>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
+{{end}}
