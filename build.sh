@@ -1,12 +1,18 @@
 # !/bin/bash 
 
+set -v
+
 APP_PATH=/usr/local/app
 IM_NAME=IM-xixi
 IM_PATH=${APP_PATH}/${IM_NAME}
 
+# 删除原有的文件
+OLD_APP_BIN=`whereis IM-xixi | awk '{print $2}'`
+rm -rf ${IM_PATH} ${OLD_APP_BIN} bin
+
 echo "${IM_NAME} building..."
-mkdir -p ./bin
-go build -o ./bin/${IM_NAME}
+mkdir -p bin ${IM_PATH}
+go build -o bin/${IM_NAME}
 
 cp -r ./view ${IM_PATH}
 cp -r ./conf ${IM_PATH}
@@ -22,4 +28,4 @@ IM_MNT_PATH=/data/${IM_NAME}/mnt
 
 # 创建mnt目录的链接
 mkdir -p ${IM_MNT_PATH}
-ln -s ${IM_MNT_PATH} ${IM_PATH}/mnt
+ln -s ${IM_MNT_PATH}/ ${IM_PATH}/mnt
