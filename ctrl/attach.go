@@ -1,7 +1,6 @@
 package ctrl
 
 import (
-	"IM-xixi/util"
 	"fmt"
 	"io"
 	"math/rand"
@@ -9,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/shiawaseli/IM-xixi/util"
 )
 
 func init() {

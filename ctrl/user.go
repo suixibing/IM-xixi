@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"IM-xixi/model"
-	"IM-xixi/service"
-	"IM-xixi/util"
+	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/shiawaseli/IM-xixi/service"
+	"github.com/shiawaseli/IM-xixi/util"
 )
 
 var userService service.UserService

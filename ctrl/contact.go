@@ -1,10 +1,11 @@
 package ctrl
 
 import (
-	"IM-xixi/model"
-	"IM-xixi/service"
-	"IM-xixi/util"
 	"net/http"
+
+	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/shiawaseli/IM-xixi/service"
+	"github.com/shiawaseli/IM-xixi/util"
 )
 
 var contactService service.ContactService

@@ -1,11 +1,11 @@
 package service
 
 import (
-	"IM-xixi/model"
 	"fmt"
 	"time"
 
 	"github.com/prometheus/common/log"
+	"github.com/shiawaseli/IM-xixi/model"
 )
 
 // CommunityService 用于使用群组服务

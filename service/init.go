@@ -1,11 +1,12 @@
 package service
 
 import (
-	"IM-xixi/model"
 	"fmt"
 	"log"
 	"math/rand"
 	"time"
+
+	"github.com/shiawaseli/IM-xixi/model"
 
 	// mysql 引擎
 	_ "github.com/go-sql-driver/mysql"

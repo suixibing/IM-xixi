@@ -1,4 +1,4 @@
-module IM-xixi
+module github.com/shiawaseli/IM-xixi
 
 go 1.14
 

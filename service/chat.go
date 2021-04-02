@@ -1,7 +1,6 @@
 package service
 
 import (
-	"IM-xixi/model"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/shiawaseli/IM-xixi/model"
 )
 
 // ChatService 用于使用通讯服务

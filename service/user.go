@@ -1,13 +1,13 @@
 package service
 
 import (
-	"IM-xixi/model"
-	"IM-xixi/util"
 	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/prometheus/common/log"
+	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/shiawaseli/IM-xixi/util"
 )
 
 // UserService 用于使用用户服务

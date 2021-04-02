@@ -1,14 +1,14 @@
 package ctrl
 
 import (
-	"IM-xixi/model"
-	"IM-xixi/service"
-	"IM-xixi/util"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/websocket"
+	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/shiawaseli/IM-xixi/service"
+	"github.com/shiawaseli/IM-xixi/util"
 	"gopkg.in/fatih/set.v0"
 )
 

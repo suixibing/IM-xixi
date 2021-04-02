@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"text/template"
 
-	"IM-xixi/ctrl"
+	"github.com/shiawaseli/IM-xixi/ctrl"
 )
 
 func main() {
@@ -47,7 +48,10 @@ func main() {
 	http.Handle("/mnt/", http.FileServer(http.Dir(".")))
 
 	RegisterViews()
-	http.ListenAndServe(":80", nil)
+	fmt.Println("regiter views finish!")
+	if err := http.ListenAndServe(":80", nil); err != nil {
+		fmt.Println(err)
+	}
 	// http.ListenAndServeTLS(":8081", "server.crt", "server.key", nil)
 }
 
