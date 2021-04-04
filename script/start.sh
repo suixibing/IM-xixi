@@ -1,8 +1,10 @@
+#########################################################################
+# File Name: script/start.sh
+# Author: shiawaseli
+# Desc: start IM service
+# Created Time: Sun Apr  4 13:44:20 2021
+#########################################################################
 # !/bin/bash 
-
-APP_PATH=/usr/local/app                                                                                                    
-IM_NAME=IM-xixi
-IM_PATH=${APP_PATH}/${IM_NAME}
 
 cd ${IM_PATH}
 ${IM_PATH}/${IM_NAME} &

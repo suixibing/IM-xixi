@@ -1,31 +1,38 @@
-# !/bin/bash 
+#########################################################################
+# File Name: build.sh
+# Author: shiawaseli
+# Desc: build package
+# Created Time: Sun Apr  4 11:47:10 2021
+#########################################################################
+# !/bin/bash
 
-set -v
+# 引入常用变量
+source script/comm.sh
 
-APP_PATH=/usr/local/app
-IM_NAME=IM-xixi
-IM_PATH=${APP_PATH}/${IM_NAME}
+# 编译
+echo -e "${START_ECHO_FRONT}stage(1/2) 开始编译...${ECHO_BACK}"
+go build -o ${IM_NAME}
+echo -e "${SUCC_ECHO_FRONT}stage(1/2) 编译成功!${ECHO_BACK}\n"
 
-# 删除原有的文件
-OLD_APP_BIN=`whereis IM-xixi | awk '{print $2}'`
-rm -rf ${IM_PATH} ${OLD_APP_BIN} bin
+# 打包
+echo -e "${START_ECHO_FRONT}stage(2/2) 开始打包...${ECHO_BACK}"
+# 在临时目录中进行打包
+TMP_BUILD_DIR=.tmp_build_$(date +%s)
+PACKAGE_FILE="${IM_NAME} ./conf ./view ./script ./asset"
 
-echo "${IM_NAME} building..."
-mkdir -p bin ${IM_PATH}
-go build -o bin/${IM_NAME}
+mkdir -p ${TMP_BUILD_DIR}/${IM_NAME}
+check_dir $(pwd)
+cp -r ${PACKAGE_FILE} ${TMP_BUILD_DIR}/${IM_NAME}
 
-cp -r ./view ${IM_PATH}
-cp -r ./conf ${IM_PATH}
-cp -r ./script ${IM_PATH}
-cp -r ./asset ${IM_PATH}
-cp ./bin/${IM_NAME} ${IM_PATH}
+cd ${TMP_BUILD_DIR}
+tar czvf ${IM_PACKAGE} *
+if [ "$?" != "0"  ] ; then
+    echo -e "${ERR_ECHO_FRONT}压缩文件失败!${ECHO_BACK}"
+    exit 1
+fi
+cd -
 
-# 创建软链接
-rm -rf ${APP_PATH}/bin/${IM_NAME}
-ln -s ${IM_PATH}/script/control.sh ${APP_PATH}/bin/${IM_NAME}
+cp ${TMP_BUILD_DIR}/${IM_PACKAGE} .
+rm -rf ${TMP_BUILD_DIR}
+echo -e "${SUCC_ECHO_FRONT}stage(2/2) 生成包文件 ${IM_PACKAGE}，打包成功!${ECHO_BACK}"
 
-IM_MNT_PATH=/data/${IM_NAME}/mnt
-
-# 创建mnt目录的链接
-mkdir -p ${IM_MNT_PATH}
-ln -s ${IM_MNT_PATH}/ ${IM_PATH}/mnt
