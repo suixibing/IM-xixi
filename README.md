@@ -59,16 +59,17 @@ $ IM-xixi stop
 
 ##	1、拉取镜像
 
-latest中仅支持最低限度运行的环境，要想可以支持编译，可以选择dev_base版本的镜像。
+latest中仅支持最低限度运行的环境，可以通过下载发布包更新服务。
+要想自行编译最新版本进行测试，可以选择dev_base版本的镜像。
 
 ```bash
-$ docker pull shiawaseli/chat_xixi:latest
+$ docker pull suixibing/chat_xixi:latest
 ```
 
 ##	2、使用镜像创建容器
 
 ```bash
-$ docker run -itd --name chat_xixi -v /data/IM-xixi/mnt:/data/IM-xixi/mnt --network host shiawaseli/chat_xixi:latest
+$ docker run -itd --name chat_xixi -v /data/IM-xixi/mnt:/data/IM-xixi/mnt --network host suixibing/chat_xixi:latest
 ```
 
 **参数说明:**
@@ -97,9 +98,9 @@ $ exit #退出容器
 ```bash
 # 这是一个最简单可以启动本服务的mysql镜像(version 5.7)，仅有创建有最基本的database
 # 并且数据集使用了utf8，可以支持显示中文不乱码
-$ docker pull shiawaseli/chat_xixi:mysql
+$ docker pull suixibing/chat_xixi:mysql
 # 将宿主机的3306端口映射到容器中，root密码为123456
-$ docker run -itd -p 3306:3306 -e MYSQL\_ROOT\_PASSWORD=123456 --name chat_mysql shiawaseli/chat_xixi:mysql
+$ docker run -itd -p 3306:3306 -e MYSQL\_ROOT\_PASSWORD=123456 --name chat_mysql suixibing/chat_xixi:mysql
 # 使用如下命令可以进入mysql容器
 $ docker exec -it chat_mysql /bin/bash
 # 也可以直接在宿主机中直接登录mysql
