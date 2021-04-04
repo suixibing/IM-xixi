@@ -1,6 +1,6 @@
 #########################################################################
 # File Name: script/start.sh
-# Author: shiawaseli
+# Author: suixibing
 # Desc: start IM service
 # Created Time: Sun Apr  4 13:44:20 2021
 #########################################################################

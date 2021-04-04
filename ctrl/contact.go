@@ -3,9 +3,9 @@ package ctrl
 import (
 	"net/http"
 
-	"github.com/shiawaseli/IM-xixi/model"
-	"github.com/shiawaseli/IM-xixi/service"
-	"github.com/shiawaseli/IM-xixi/util"
+	"github.com/suixibing/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/service"
+	"github.com/suixibing/IM-xixi/util"
 )
 
 var contactService service.ContactService

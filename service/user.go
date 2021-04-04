@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/prometheus/common/log"
-	"github.com/shiawaseli/IM-xixi/model"
-	"github.com/shiawaseli/IM-xixi/util"
+	"github.com/suixibing/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/util"
 )
 
 // UserService 用于使用用户服务

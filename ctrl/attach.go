@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shiawaseli/IM-xixi/util"
+	"github.com/suixibing/IM-xixi/util"
 )
 
 func init() {

@@ -1,6 +1,6 @@
 #########################################################################
 # File Name: install.sh
-# Author: shiawaseli
+# Author: suixibing
 # Desc: install package
 # Created Time: Sun Apr  4 11:57:19 2021
 #########################################################################
@@ -58,7 +58,7 @@ echo -e "${SUCC_ECHO_FRONT}stage(3/4) 解压缩包成功!${ECHO_BACK}"
 # stage4 创建服务和mnt目录的软链接
 echo -e "${START_ECHO_FRONT}stage(4/4) 创建服务和mnt目录的软链接...${ECHO_BACK}"
 ln -s ${IM_PATH}/script/control.sh ${APP_PATH}/bin/${IM_NAME}
-SYMBOLIC_CHECK=$(tree ${APP_PATH}/bin | grep "${IM_NAME} -> ${IM_PATH}/script/control.sh" | wc -l)
+SYMBOLIC_CHECK=$(ls -l ${APP_PATH}/bin | grep "${IM_NAME} -> ${IM_PATH}/script/control.sh" | wc -l)
 if [ "${SYMBOLIC_CHECK}" == "0" ] ; then
     echo -e "${ERR_ECHO_FRONT}服务的软链接创建失败!${ECHO_BACK}"
     exit 1
@@ -68,7 +68,7 @@ fi
 IM_MNT_PATH=/data/${IM_NAME}/mnt
 mkdir -p ${IM_MNT_PATH}
 ln -s ${IM_MNT_PATH}/ ${IM_PATH}/mnt
-SYMBOLIC_CHECK=$(tree ${IM_PATH} | grep "mnt -> ${IM_NNT_PATH}" | wc -l)
+SYMBOLIC_CHECK=$(ls -l ${IM_PATH} | grep "mnt -> ${IM_NNT_PATH}" | wc -l)
 if [ "${SYMBOLIC_CHECK}" == "0" ] ; then
     echo -e "${ERR_ECHO_FRONT}mnt目录的软链接创建失败!${ECHO_BACK}"
     exit 1

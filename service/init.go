@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/model"
 
 	// mysql 引擎
 	_ "github.com/go-sql-driver/mysql"

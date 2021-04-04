@@ -8,7 +8,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/shiawaseli/IM-xixi/ctrl"
+	"github.com/suixibing/IM-xixi/ctrl"
 )
 
 func main() {

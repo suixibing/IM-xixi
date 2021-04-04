@@ -1,6 +1,6 @@
 #########################################################################
 # File Name: script/control.sh
-# Author: shiawaseli
+# Author: suixibing
 # Desc: control IM service
 # Created Time: Sun Apr  4 13:27:07 2021
 #########################################################################

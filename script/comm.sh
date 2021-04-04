@@ -1,6 +1,6 @@
 #########################################################################
 # File Name: script/comm.sh
-# Author: shiawaseli
+# Author: suixibing
 # Desc: common values
 # Created Time: Sun Apr  4 11:32:42 2021
 #########################################################################

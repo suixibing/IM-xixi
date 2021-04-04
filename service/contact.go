@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/prometheus/common/log"
-	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/model"
 )
 
 // ContactService 用于使用用户通讯服务

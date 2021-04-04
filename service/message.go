@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/shiawaseli/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/model"
 )
 
 // MessageService 用于使用消息管理服务

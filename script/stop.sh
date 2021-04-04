@@ -1,6 +1,6 @@
 #########################################################################
 # File Name: script/stop.sh
-# Author: shiawaseli
+# Author: suixibing
 # Desc: stop IM service
 # Created Time: Sun Apr  4 13:52:25 2021
 #########################################################################

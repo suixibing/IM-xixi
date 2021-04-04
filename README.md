@@ -6,16 +6,17 @@
 
 #	一、使用源代码部署
 
-##	1、首先拉取代码并进入目录
+##	1、首先拉取代码
 
 ```bash
-$ git clone https://github.com/shiawaseli/IM-xixi.git
-$ cd IM-xixi
+# 也可以使用 https://gitee.com/suixibing/IM-xixi.git
+$ git clone https://github.com/suixibing/IM-xixi.git
 ```
 
 ##	2、使用 build.sh 编译并打包编译结果
 
 ```bash
+$ cd IM-xixi
 $ ./build.sh
 ```
 
