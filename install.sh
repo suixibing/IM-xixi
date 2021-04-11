@@ -31,8 +31,8 @@ echo -e "${SUCC_ECHO_FRONT}stage(1/4) 包文件存在!${ECHO_BACK}"
 echo -e "${START_ECHO_FRONT}stage(2/4) 确认必要的目录存在并具有写权限...${ECHO_BACK}"
 check_dir ${APP_PATH} ${APP_PATH}/bin /data
 # 检查环境变量PATH中是否包含${APP_PATH}/bin
-PATH_CHECK=$(env | grep "^PATH=" | grep "${APP_PATH}/bin" | wc -l)
-if [ "${PATH_CHECK}" == "0" ] ; then
+PATH_CHECK=$(env | grep "^PATH=" | grep "${APP_PATH}/bin" | wc -l | awk '{print $1}')
+if [ "${PATH_CHECK}" != "1" ] ; then
     echo 'export PATH=$PATH:'${APP_PATH}/bin >> ~/.bashrc
     echo -e "${CHECK_ECHO_FRONT}请运行 source ~/.bashrc 更新环境变量!${ECHO_BACK}"
 fi
