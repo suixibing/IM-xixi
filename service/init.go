@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/suixibing/IM-xixi/model"
+	"github.com/suixibing/IM-xixi/util"
 
 	// mysql 引擎
 	_ "github.com/go-sql-driver/mysql"
@@ -19,16 +20,18 @@ var DBEngine *xorm.Engine
 func init() {
 	rand.Seed(time.Now().UnixNano()) //利用当前时间的UNIX时间戳初始化rand包
 
+	conf := util.LoadConfig("./conf/service.yaml", false)
+
 	var err error
-	DBEngine, err = xorm.NewEngine("mysql", "root:123456@(127.0.0.1:3306)/chat_xixi?charset=utf8")
+	DBEngine, err = xorm.NewEngine(conf.Database.DBName(), conf.Database.GetInfo())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	// 显示执行的SQL语句
-	DBEngine.ShowSQL(true)
+	DBEngine.ShowSQL(conf.Global.ShowSQL)
 	// 设置最大同时连接数
-	DBEngine.SetMaxOpenConns(2)
+	DBEngine.SetMaxOpenConns(conf.Global.MaxOpenConns)
 
 	// 自动创建结构对应的表单
 	err = DBEngine.Sync2(
