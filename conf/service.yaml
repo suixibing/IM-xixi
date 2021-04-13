@@ -11,6 +11,11 @@ global:                                              #全局配置
   app: IM-xixi                                       #服务的应用名
   appPath: /usr/local/app                            #应用的存放地址
 
+  #http通用配置
+  usehttps: false                                    #是否使用https
+  httpsCrt: ./server.crt                             #crt文件位置
+  httpsKey: ./server.key                             #key文件位置
+
   #数据库通用设置
   showSQL: true                                      #显示执行的SQL语句
   maxOpenConns: 3                                    #最大同时连接数

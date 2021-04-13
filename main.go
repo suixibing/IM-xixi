@@ -9,9 +9,12 @@ import (
 	"text/template"
 
 	"github.com/suixibing/IM-xixi/ctrl"
+	"github.com/suixibing/IM-xixi/util"
 )
 
 func main() {
+	conf := util.LoadConfig("./conf/service.yaml", false)
+
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		file, err := os.Open("./favicon.icon")
 		if err != nil {
@@ -49,10 +52,17 @@ func main() {
 
 	RegisterViews()
 	fmt.Println("regiter views finish!")
-	if err := http.ListenAndServe(":80", nil); err != nil {
-		fmt.Println(err)
+
+	port := fmt.Sprintf(":%d", conf.Services[0].Port)
+	if conf.Global.UseHttps {
+		if err := http.ListenAndServeTLS(port, conf.Global.HttpsCrt, conf.Global.HttpsKey, nil); err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		if err := http.ListenAndServe(port, nil); err != nil {
+			fmt.Println(err)
+		}
 	}
-	// http.ListenAndServeTLS(":8081", "server.crt", "server.key", nil)
 }
 
 // RegisterViews 自动注册模板

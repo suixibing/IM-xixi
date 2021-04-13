@@ -17,11 +17,16 @@ type ServerCfg struct {
 
 // GlobalCfg 全局配置
 type GlobalCfg struct {
-	DBName       string `mapstructure:"database"`
-	APP          string `mapstructure:"app"`
-	APPPath      string `mapstructure:"appPath"`
-	ShowSQL      bool   `mapstructure:"showSQL"`
-	MaxOpenConns int    `mapstructure:"maxOpenConns"`
+	DBName  string `mapstructure:"database"`
+	APP     string `mapstructure:"app"`
+	APPPath string `mapstructure:"appPath"`
+	// http配置
+	UseHttps bool   `mapstructure:"usehttps"`
+	HttpsCrt string `mapstructure:"httpsCrt"`
+	HttpsKey string `mapstructure:"httpsKey"`
+	// 数据库配置
+	ShowSQL      bool `mapstructure:"showSQL"`
+	MaxOpenConns int  `mapstructure:"maxOpenConns"`
 }
 
 // ServiceCfg 服务配置
