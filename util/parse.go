@@ -134,7 +134,7 @@ func setWithProperType(valueKind reflect.Kind, val string, structField reflect.V
 	case reflect.String:
 		structField.SetString(val)
 	default:
-		return errors.New("Unknown type")
+		return errors.New("未知的类型")
 	}
 	return nil
 }
@@ -189,7 +189,7 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 
 	if timeFormat == "" {
 		timeFormat = "2006-01-02 15:04:05"
-		val = strings.Replace(val, "/", "-", 0)
+		val = strings.Replace(val, "/", "-", -1)
 		num := len(strings.Split(val, " "))
 		if num == 1 {
 			val = val + " 00:00:00"

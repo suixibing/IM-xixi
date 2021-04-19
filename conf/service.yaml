@@ -23,6 +23,31 @@ global:                                              #全局配置
 services:                                            #服务配置
   - id: 1                                            #服务的编号
     port: 8080                                       #服务监听的端口
+    log:
+      TimeTagFormat: "200601021504"
+      LogPath: /usr/local/app/IM-xixi/log
+      FileName: chatlog
+      # MaxRemain will auto clear the roling file list, set 0 will disable auto clean
+      MaxRemain: -1
+
+      # RollingPolicy give out the rolling policy
+      # We got 3 policies(actually, 2)
+      # WithoutRolling(0) no rolling will happen
+      # TimeRolling(1) rolling by time
+      # VolumeRolling(2) rolling by file size
+      RollingPolicy: 1
+      RollingTimePattern: "0 0 0 * * *"
+      RollingVolumeSize: 1G
+
+      # WriterMode in 4 modes below
+      # 1. none 2. lock
+      # 3. async 4. buffer
+      WriterMode: lock
+      
+      # BufferWriterThershould in Byte
+      BufferWriterThershould: 64
+      # Compress will compress log file with gzip
+      Compress: false
 
 database:                                            #数据库配置
   mysql:                                             #mysql配置
