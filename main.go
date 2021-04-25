@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"text/template"
@@ -13,21 +12,30 @@ import (
 )
 
 func main() {
-	conf := util.LoadConfig("./conf/service.yaml", false)
+	conf := util.LoadConfig(util.DefaultConfig, false)
+	util.GetLog().Info().Msg("设置服务日志为一号服务的日志")
+	util.SetLog(conf.Services[0].Log)
+	util.GetLog().Info().Stringer("服务日志级别", util.GetLog().GetLevel()).Msg("服务设置")
 
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		file, err := os.Open("./favicon.icon")
+		util.Log.Debug().Str("path", "./favicon.ico").Msg("发送ico")
+		file, err := os.Open("./favicon.ico")
 		if err != nil {
+			util.Log.Error().Err(err).Str("path", "./favicon.ico").Msg("ico初始化失败")
 			return
 		}
+		defer file.Close()
 		_, err = io.Copy(w, file)
 		if err != nil {
+			util.Log.Error().Err(err).Str("path", "./favicon.ico").Msg("ico拷贝失败")
 			return
 		}
+		util.Log.Trace().Str("path", "./favicon.ico").Msg("ico发送成功")
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Location", "/user/login.shtml")
 		w.WriteHeader(301)
+		util.Log.Trace().Msg("根目录重定向到注册页面")
 	})
 
 	http.HandleFunc("/user/login", ctrl.UserLogin)
@@ -51,16 +59,15 @@ func main() {
 	http.Handle("/mnt/", http.FileServer(http.Dir(".")))
 
 	RegisterViews()
-	fmt.Println("regiter views finish!")
 
 	port := fmt.Sprintf(":%d", conf.Services[0].Port)
 	if conf.Global.UseHttps {
 		if err := http.ListenAndServeTLS(port, conf.Global.HttpsCrt, conf.Global.HttpsKey, nil); err != nil {
-			fmt.Println(err)
+			util.Log.Error().Err(err).Msg("https服务启动失败")
 		}
 	} else {
 		if err := http.ListenAndServe(port, nil); err != nil {
-			fmt.Println(err)
+			util.Log.Error().Err(err).Msg("http服务启动失败")
 		}
 	}
 }
@@ -69,16 +76,17 @@ func main() {
 func RegisterViews() {
 	tpls, err := template.New("root").ParseGlob("view/**/*")
 	if err != nil {
-		log.Fatal(err)
+		util.Log.Fatal().Err(err).Msg("ParseGlob失败")
 	}
 	for _, tpl := range tpls.Templates() {
 		tplname := tpl.Name()
 		http.HandleFunc(tplname, func(w http.ResponseWriter, r *http.Request) {
 			err = tpls.ExecuteTemplate(w, tplname, nil)
 			if err != nil {
-				log.Fatal(err)
+				util.Log.Fatal().Err(err).Msg("模板执行失败")
 			}
 		})
-		log.Printf("register tpl:> %s", tplname)
+		util.Log.Debug().Str("模板名称", tplname).Msg("模板注册")
 	}
+	util.Log.Info().Msg("views注册结束")
 }

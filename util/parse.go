@@ -188,7 +188,7 @@ func setTimeField(val string, structField reflect.StructField, value reflect.Val
 	//2018-01-02 01:02:03
 
 	if timeFormat == "" {
-		timeFormat = "2006-01-02 15:04:05"
+		timeFormat = DefaultTimeFormat
 		val = strings.Replace(val, "/", "-", -1)
 		num := len(strings.Split(val, " "))
 		if num == 1 {

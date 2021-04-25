@@ -87,26 +87,26 @@ func loadConfig(etc string) *ServerCfg {
 
 	for _, service := range Config.Services {
 		service.newLogByConfig()
+
+		level, err := zerolog.ParseLevel(service.LogLevel)
+		if err != nil {
+			panic(fmt.Errorf("日志级别异常: %s", err))
+		}
+		l := service.Log.Level(level)
+		service.Log = &l
 	}
 	return Config
 }
 
 // ServiceCfg 服务配置
 type ServiceCfg struct {
-	ID     uint64                `mapstructure:"id"`
-	Port   uint32                `mapstructure:"port"`
-	LogCfg *rollingwriter.Config `mapstructure:"log"`
-	l      zerolog.Logger
+	ID       uint64                `mapstructure:"id"`
+	Port     uint32                `mapstructure:"port"`
+	LogCfg   *rollingwriter.Config `mapstructure:"log"`
+	Log      *zerolog.Logger
+	LogLevel string
 }
 
 func (s *ServiceCfg) newLogByConfig() {
-	if s.LogCfg == nil {
-		s.LogCfg = Config.NewDefaultLogCfg()
-	}
-
-	w, err := rollingwriter.NewWriterFromConfig(s.LogCfg)
-	if err != nil {
-		panic(fmt.Errorf("日志文件异常: %v", err))
-	}
-	s.l = zerolog.New(w).With().Timestamp().Logger()
+	s.Log = newLogByCfg(s.LogCfg)
 }

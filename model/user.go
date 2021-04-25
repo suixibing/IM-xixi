@@ -1,6 +1,11 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/suixibing/IM-xixi/util"
+)
 
 const (
 	// SexMan 男性
@@ -32,4 +37,11 @@ type User struct {
 	Token    string    `xorm:"varchar(40)" form:"token" json:"token"`
 	Memo     string    `xorm:"varchar(140)" form:"memo" json:"memo"`
 	CreateAt time.Time `xorm:"datetime" form:"createat" json:"createat"`
+}
+
+// String 实现fmt.Stringer接口
+func (u User) String() string {
+	return fmt.Sprintf("{id: %d, mobile: %s, nickname: %s, avatar: %s, sex: %s, birthday: %v, online: %d, memo: %s, createat: %v}",
+		u.ID, u.Mobile, u.Nickname, u.Avatar, u.Sex, u.Birthday.Format(util.DefaultTimeFormat),
+		u.Online, u.Memo, u.CreateAt.Format(util.DefaultTimeFormat))
 }

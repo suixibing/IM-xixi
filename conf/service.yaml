@@ -23,6 +23,7 @@ global:                                              #全局配置
 services:                                            #服务配置
   - id: 1                                            #服务的编号
     port: 8080                                       #服务监听的端口
+    LogLevel: info                                   #日志级别
     log:
       TimeTagFormat: "200601021504"
       LogPath: /usr/local/app/IM-xixi/log

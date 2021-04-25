@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -47,7 +46,8 @@ func Resp(w http.ResponseWriter, code int, msg string, data interface{}) {
 	}
 	ret, err := json.Marshal(h)
 	if err != nil {
-		log.Println(err.Error())
+		GetLog().Error().Err(err).Msg("json编码失败")
+		ret = []byte("{\"code\":-1,\"msg\":\"json编码失败\",\"data\":\"\"}")
 	}
 	w.Write(ret)
 }
@@ -64,7 +64,8 @@ func RespList(w http.ResponseWriter, code int, rows interface{}, total int) {
 	}
 	ret, err := json.Marshal(h)
 	if err != nil {
-		log.Println(err.Error())
+		GetLog().Error().Err(err).Msg("json编码失败")
+		ret = []byte("{\"code\":-1,\"msg\":\"json编码失败\",\"data\":\"\"}")
 	}
 	w.Write(ret)
 }

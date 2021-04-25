@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	// CmdHeart 心跳
@@ -23,8 +26,8 @@ const (
 	// CmdApplyInfoOK 申请加群或加好友成功(dstid表示目标id[加群时为群主id],url存储群id,
 	// amount区分请求对象是群-11还是用户-10,content为申请理由)
 	CmdApplyInfoOK = 203
-	// CmdUpdateMsgOK 更新消息信息成功
-	CmdUpdateMsgOK = 204
+	// CmdUpdateApplyInfoOK 更新申请信息的状态成功
+	CmdUpdateApplyInfoOK = 204
 	// CmdDealApplyOK 加好友/群成功
 	CmdDealApplyOK = 205
 
@@ -35,8 +38,8 @@ const (
 	CmdGetChatHistory = 302
 	// CmdApplyInfo 申请加群或加好友(dstid表示目标id,amount区分请求对象是群-11还是用户-10,content为申请理由)
 	CmdApplyInfo = 303
-	// CmdUpdateMsg 更新消息信息(通过id更新,所以必须要有id)
-	CmdUpdateMsg = 304
+	// CmdUpdateApplyInfo 更新申请信息的状态(通过id更新,所以必须要有id)
+	CmdUpdateApplyInfo = 304
 	// CmdDealApply 处理请求，加好友(直接修改203为305)，加群(直接修改203为306)
 	CmdDealApply = 305
 
@@ -57,4 +60,10 @@ type Message struct {
 	Memo     string    `xorm:"varchar(120)" json:"memo,omitempty" form:"memo"`            //简单描述
 	Amount   int       `xorm:"int(11)" json:"amount,omitempty" form:"amount"`             //其他和数字相关的
 	CreateAt time.Time `xorm:"datetime" form:"createat" json:"createat"`                  //消息时间
+}
+
+// String 实现fmt.Stringer接口
+func (m Message) String() string {
+	return fmt.Sprintf("{id: %d, userid: %d, cmd: %d, dstid: %d, media: %d, content: %s, pic: %s, url: %s, memo: %s, amount: %d, createat: %v}",
+		m.ID, m.Userid, m.Cmd, m.Dstid, m.Media, m.Content, m.Pic, m.URL, m.Memo, m.Amount, m.CreateAt)
 }
