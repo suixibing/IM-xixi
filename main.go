@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"text/template"
 
 	"github.com/suixibing/IM-xixi/ctrl"
@@ -18,19 +16,9 @@ func main() {
 	util.GetLog().Info().Stringer("服务日志级别", util.GetLog().GetLevel()).Msg("服务设置")
 
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		util.Log.Debug().Str("path", "./favicon.ico").Msg("发送ico")
-		file, err := os.Open("./favicon.ico")
-		if err != nil {
-			util.Log.Error().Err(err).Str("path", "./favicon.ico").Msg("ico初始化失败")
-			return
-		}
-		defer file.Close()
-		_, err = io.Copy(w, file)
-		if err != nil {
-			util.Log.Error().Err(err).Str("path", "./favicon.ico").Msg("ico拷贝失败")
-			return
-		}
-		util.Log.Trace().Str("path", "./favicon.ico").Msg("ico发送成功")
+		w.Header().Set("Location", "/asset/images/favicon.ico")
+		w.WriteHeader(301)
+		util.Log.Trace().Msg("图标重定向")
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Location", "/user/login.shtml")
